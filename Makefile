@@ -28,13 +28,17 @@ local-registry: | .tmp/local-registry
 	minikube addons enable ingress
 
 start-dev: | .tmp/minikube-ingress .tmp/local-registry
-	# bazel run //:all.create
-	bazel run //:all.apply
+	bazel build //:all
+	bazel run //:all.apply --workspace_status_command="./status/dev.sh"
 .PHONY: start-dev
 
+reapply-dev:
+	bazel run //:all.apply --workspace_status_command="./status/dev.sh"
+.PHONY: reapply-dev
+
 stop-dev:
-	bazel run //:all.delete
+	bazel run //:all.delete --workspace_status_command="./status/dev.sh"
 	docker stop registry-fwd || true
-	minikube stop
+	minikube delete
 	rm -rf .tmp
 .PHONY: stop-dev
